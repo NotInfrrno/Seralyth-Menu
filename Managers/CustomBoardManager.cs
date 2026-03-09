@@ -170,7 +170,7 @@ namespace Seralyth.Managers
         public const int StumpLeaderboardIndex = 3;
         public const int ForestLeaderboardIndex = 3;
 
-        public static string motdTemplate = "You are using build {0}. This menu was created by Seralyth on GitHub." +
+        public static string motdTemplate = "You are using build {0}. This menu was created by Seralyth Software. " +
         "This menu is completely free and open sourced, if you paid for this menu you have been scammed. " +
         "There are a total of <b>{1}</b> mods on this menu. " +
         "<color=red>Seralyth is not responsible for any bans using this menu.</color> " +
