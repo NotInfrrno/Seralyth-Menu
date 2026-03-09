@@ -440,13 +440,12 @@ namespace Seralyth.Managers
             {
                 float left = 0f;
                 float right = 0f;
+                int aFrame = ((int)sourcePosition) % frameCount;
+                int bFrame = (aFrame + 1) % frameCount;
+                float frac = sourcePosition - Mathf.Floor(sourcePosition);
 
                 if (!muteMicrophone && !muteMicForClip)
                 {
-                    int aFrame = ((int)sourcePosition) % frameCount;
-                    int bFrame = (aFrame + 1) % frameCount;
-                    float frac = sourcePosition - Mathf.Floor(sourcePosition);
-
                     if (ch == 1)
                     {
                         float a = rawMicrophoneData[aFrame];
@@ -466,9 +465,9 @@ namespace Seralyth.Managers
                         left = Mathf.Lerp(aL, bL, frac);
                         right = Mathf.Lerp(aR, bR, frac);
                     }
-
-                    sourcePosition += sourceStep;
                 }
+
+                sourcePosition += sourceStep;
 
                 microphoneBuffer[i] = left * gain;
                 if (Channels > 1 && i + 1 < buffer.Length)
