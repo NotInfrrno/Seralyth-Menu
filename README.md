@@ -123,7 +123,7 @@ If you wish to support us, here are some of the ways you can!
 > Menu sends requests to https://text.pollinations.ai for the mod **AI Assistant**. (when enabled)<br>
 > Menu sends requests to https://lazypy.ro for many TTS voices.<br>
 > Menu connects to wss://menu.seralyth.software for friend system and administrative purposes.<br>
-> The donate, search, star and speak symbols are made by [Icons8](https://icons8.com).
+> The donate, search, star and speak symbols are provided from [Icons8](https://icons8.com).
 
 > Seralyth Menu  README.md<br>
 > A community driven mod menu for Gorilla Tag with over 1000+ mods
