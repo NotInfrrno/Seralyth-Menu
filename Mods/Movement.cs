@@ -5247,29 +5247,34 @@ namespace Seralyth.Mods
             if (targetHz < 4000)
                 targetHz = 7500;
 
-            tinnitus = null;
-
             Buttons.GetIndex("Change Tinnitus Hertz").overlapText = "Change Tinnitus Hertz <color=grey>[</color><color=green>" + targetHz + "</color><color=grey>]</color>";
         }
-        public static AudioClip CreateTinnitusSound()
+        public static AudioClip CreateTinnitusSound(float seconds = 180f, float amplitude = 0.15f)
         {
-            int sampleRate = VoiceManager.Get().SamplingRate;
-            int samples = (int)(sampleRate * 180f);
-            AudioClip clip = AudioClip.Create("Tinnitus", samples, 1, sampleRate, false);
+            var vm = VoiceManager.Get();
+
+            int sampleRate = vm.OutputRate; 
+            targetHz = Mathf.Clamp(targetHz, 20, (sampleRate / 2) - 1);
+
+            int samples = Mathf.CeilToInt(sampleRate * seconds);
+            var clip = AudioClip.Create("Tinnitus", samples, 1, sampleRate, false);
 
             float[] data = new float[samples];
-            int samplesPerWave = sampleRate / targetHz;
+            double phase = 0.0;
+            double inc = (2.0 * Math.PI * targetHz) / sampleRate;
 
             for (int i = 0; i < samples; i++)
             {
-                data[i] = (i % samplesPerWave) < (samplesPerWave / 2) ? 1f : -1f;
+                data[i] = (float)(Math.Sin(phase) * amplitude);
+                phase += inc;
+                if (phase > 2.0 * Math.PI) phase -= 2.0 * Math.PI;
             }
 
             clip.SetData(data, 0);
             return clip;
         }
 
-        public static Dictionary<AudioClip, Guid> tinnitus;   
+        public static Dictionary<AudioClip, Guid> tinnitus = new Dictionary<AudioClip, Guid>();
         public static void TinnitusGun()
         {
 
@@ -5356,8 +5361,10 @@ namespace Seralyth.Mods
         public static void DisableTinnitus()
         {
             SerializePatch.OverrideSerialization = null;
-            VoiceManager.Get().StopAudioClip(tinnitus.Values.First());
-		}
+            foreach (var id in tinnitus.Values)
+                VoiceManager.Get().StopAudioClip(id);
+            tinnitus.Clear();
+        }
 
         private static float hoverboardSpawnDelay;
         private static float soundSpamDelay;
