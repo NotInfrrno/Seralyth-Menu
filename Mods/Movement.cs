@@ -5234,7 +5234,7 @@ namespace Seralyth.Mods
 
         public static bool tinnitusSelf;
 
-        public static int targetHz = 6000;
+        public static int targetHz = 4000;
         public static void ChangeTinnitusHz(bool positive = true)
         {
             if (positive)
@@ -5249,25 +5249,26 @@ namespace Seralyth.Mods
 
             Buttons.GetIndex("Change Tinnitus Hertz").overlapText = "Change Tinnitus Hertz <color=grey>[</color><color=green>" + targetHz + "</color><color=grey>]</color>";
         }
-        public static AudioClip CreateTinnitusSound(float seconds = 180f, float amplitude = 0.15f)
+        public static AudioClip CreateTinnitusSound(float seconds = 180f)
         {
             var vm = VoiceManager.Get();
+            int sampleRate = vm.OutputRate;
 
-            int sampleRate = vm.OutputRate; 
-            targetHz = Mathf.Clamp(targetHz, 20, (sampleRate / 2) - 1);
-
+            int hz = Mathf.Clamp(targetHz, 1, (sampleRate / 2) - 1);
             int samples = Mathf.CeilToInt(sampleRate * seconds);
-            var clip = AudioClip.Create("Tinnitus", samples, 1, sampleRate, false);
 
-            float[] data = new float[samples];
+            var clip = AudioClip.Create("tinnitus", samples, 1, sampleRate, false);
+            var data = new float[samples];
+
             double phase = 0.0;
-            double inc = (2.0 * Math.PI * targetHz) / sampleRate;
+            double inc = (double)hz / sampleRate; // cycles per sample
 
             for (int i = 0; i < samples; i++)
             {
-                data[i] = (float)(Math.Sin(phase) * amplitude);
+                data[i] = (phase < 0.5) ? 1f : -1f;
+
                 phase += inc;
-                if (phase > 2.0 * Math.PI) phase -= 2.0 * Math.PI;
+                phase -= Math.Floor(phase);
             }
 
             clip.SetData(data, 0);

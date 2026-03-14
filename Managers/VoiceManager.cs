@@ -484,7 +484,7 @@ namespace Seralyth.Managers
             {
                 NextAudioClipSample(out float pushedLeft, out float pushedRight);
 
-                buffer[i] = Mathf.Clamp(microphoneBuffer[i] + pushedLeft, -1f, 1f);
+                //buffer[i] = Mathf.Clamp(microphoneBuffer[i] + pushedLeft, -1f, 1f);
                 if (Channels > 1 && i + 1 < buffer.Length)
                     buffer[i + 1] = Mathf.Clamp(microphoneBuffer[i + 1] + pushedRight, -1f, 1f);
             }
