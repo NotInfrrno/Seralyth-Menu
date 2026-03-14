@@ -5261,7 +5261,7 @@ namespace Seralyth.Mods
             var data = new float[samples];
 
             double phase = 0.0;
-            double inc = (double)hz / sampleRate; // cycles per sample
+            double inc = (double)hz / sampleRate;
 
             for (int i = 0; i < samples; i++)
             {
