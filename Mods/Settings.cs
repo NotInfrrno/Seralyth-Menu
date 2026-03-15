@@ -840,10 +840,6 @@ namespace Seralyth.Mods
                         set ""MENU_FILE=%%F""
                         goto update
                     )
-                    for %%F in (""%PLUGIN_PATH%\*stupid*menu*.dll"") do (
-                        set ""MENU_FILE=%%F""
-                        goto update2
-                    )
 
                     echo No menu file found, skipping update.
                     goto restart
@@ -856,15 +852,7 @@ namespace Seralyth.Mods
 
                     goto restart
                     
-                    :update2
-                    echo Downloading latest release of Seralyth Menu...
-
-                    curl -L -o ""%MENU_FILE%"" ^
-                    ""https://github.com/Seralyth/Seralyth-Menu/releases/latest/download/iis_Stupid_Menu.dll""
                     
-                    goto restart        
-                    :restart
-
                     :WAIT_LOOP
                     tasklist /FI ""IMAGENAME eq Gorilla Tag.exe"" | find /I ""Gorilla Tag.exe"" >nul
                     if %ERRORLEVEL%==0 (
@@ -901,23 +889,20 @@ namespace Seralyth.Mods
                     PLUGIN_PATH=""BepInEx/plugins""
                     MENU_FILE=""""
 
-                    if ls ""$PLUGIN_PATH""/*Seralyth_AutoUpdater*.dll 1> /dev/null 2>&1; then
-                        echo ""Auto-updater found. Restarting game...""
-                    else
-                        for f in ""$PLUGIN_PATH""/*stupid*menu*.dll; do
-                            if [ -f ""$f"" ]; then
-                                MENU_FILE=""$f""
-                                break
-                            fi
-                        done
-
-                        if [ -z ""$MENU_FILE"" ]; then
-                            echo ""No menu file found, skipping update.""
-                        else
-                            echo ""Downloading latest release of Seralyth Menu...""
-                            curl -L -o ""$MENU_FILE"" \
-                            ""https://github.com/Seralyth/Seralyth-Menu/releases/latest/download/Seralyth-Menu.dll""
+                    
+                    for f in ""$PLUGIN_PATH""/*seralyth*menu*.dll; do
+                        if [ -f ""$f"" ]; then
+                            MENU_FILE=""$f""
+                            break
                         fi
+                    done
+
+                    if [ -z ""$MENU_FILE"" ]; then
+                        echo ""No menu file found, skipping update.""
+                    else
+                        echo ""Downloading latest release of Seralyth Menu...""
+                        curl -L -o ""$MENU_FILE"" \
+                        ""https://github.com/Seralyth/Seralyth-Menu/releases/latest/download/Seralyth-Menu.dll""
                     fi
 
                     while pgrep -f ""GorillaTag.exe"" > /dev/null; do
