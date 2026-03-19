@@ -2320,55 +2320,55 @@ namespace Seralyth.Mods
                                     }
                                 };
                             }
-                        else
-                        {
-                            if (Time.time > copyVoiceGunDelay)
+                            else
                             {
-                                copyVoiceGunDelay = Time.time + 0.5f;
-
-                                gunLocked = true;
-                                lockTarget = gunTarget;
-
-                                SpeakerPatch.enabled = true;
-
-                                SpeakerPatch.targetSpeaker = lockTarget.gameObject.GetComponent<GorillaSpeakerLoudness>().speaker;
-
-                                RecorderPatch.enabled = !Buttons.GetIndex("Legacy Microphone").enabled;
-
-                                VoiceManager.Get().PostProcessors["CopyVoice"] = null;
-
-                                factory?.Dispose();
-
-                                factory = new LoopbackFactory();
-
-                                NetworkSystem.Instance.VoiceConnection.PrimaryRecorder.SourceType = Recorder.InputSourceType.Factory;
-                                NetworkSystem.Instance.VoiceConnection.PrimaryRecorder.InputFactory = () =>
+                                if (Time.time > copyVoiceGunDelay)
                                 {
-                                    return factory;
-                                };
-                                CoroutineManager.instance.StartCoroutine(DelayReloadMicrophone());
-                            }
-                        }
+                                    copyVoiceGunDelay = Time.time + 0.5f;
 
-                        NetworkSystem.Instance.VoiceConnection.PrimaryRecorder.DebugEchoMode = true;
+                                    gunLocked = true;
+                                    lockTarget = gunTarget;
+
+                                    SpeakerPatch.enabled = true;
+
+                                    SpeakerPatch.targetSpeaker = lockTarget.gameObject.GetComponent<GorillaSpeakerLoudness>().speaker;
+
+                                    RecorderPatch.enabled = !Buttons.GetIndex("Legacy Microphone").enabled;
+
+                                    VoiceManager.Get().PostProcessors["CopyVoice"] = null;
+
+                                    factory?.Dispose();
+
+                                    factory = new LoopbackFactory();
+
+                                    NetworkSystem.Instance.VoiceConnection.PrimaryRecorder.SourceType = Recorder.InputSourceType.Factory;
+                                    NetworkSystem.Instance.VoiceConnection.PrimaryRecorder.InputFactory = () =>
+                                    {
+                                        return factory;
+                                    };
+                                    CoroutineManager.instance.StartCoroutine(DelayReloadMicrophone());
+                                }
+                            }
+
+                            NetworkSystem.Instance.VoiceConnection.PrimaryRecorder.DebugEchoMode = true;
+                        }
                     }
-                }
-                if (GetGunInput(true))
-                {
-                    VRRig gunTarget = Ray.collider.GetComponentInParent<VRRig>();
-                    if (gunTarget && !gunTarget.IsLocal())
+                    if (GetGunInput(true))
                     {
-                        gunLocked = true;
-                        lockTarget = gunTarget;
+                        if (gunTarget && !gunTarget.IsLocal())
+                        {
+                            gunLocked = true;
+                            lockTarget = gunTarget;
+                        }
                     }
                 }
-            }
-            else
-            {
-                if (gunLocked)
-                    gunLocked = false;
-                if (factory != null || VoiceManager.Get().PostProcessors.ContainsKey("CopyVoice"))
-                    DisableCopyVoice();
+                else
+                {
+                    if (gunLocked)
+                        gunLocked = false;
+                    if (factory != null || VoiceManager.Get().PostProcessors.ContainsKey("CopyVoice"))
+                        DisableCopyVoice();
+                }
             }
         }
 
