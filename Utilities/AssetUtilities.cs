@@ -23,6 +23,7 @@ using Seralyth.Managers;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using UnityEngine;
@@ -111,25 +112,39 @@ namespace Seralyth.Utilities
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory);
 
-                if (!File.Exists(filePath))
+                using UnityWebRequest request = UnityWebRequest.Get(resourcePath);
+                yield return request.SendWebRequest();
+
+                if (request.result != UnityWebRequest.Result.Success)
                 {
-                    LogManager.Log("Downloading " + fileName);
+                    LogManager.LogError($"Failed to download {fileName}: {request.error}");
+                    action?.Invoke(null);
+                    yield break;
+                }
 
-                    using UnityWebRequest request = UnityWebRequest.Get(resourcePath);
-                    yield return request.SendWebRequest();
+                byte[] remoteData = request.downloadHandler.data;
+                bool shouldWrite = true;
 
-                    if (request.result != UnityWebRequest.Result.Success)
-                    {
-                        LogManager.LogError($"Failed to download {fileName}: {request.error}");
-                        action?.Invoke(null);
-                        yield break;
-                    }
+                if (File.Exists(filePath))
+                {
+                    byte[] localData = File.ReadAllBytes(filePath);
 
-                    File.WriteAllBytes(filePath, request.downloadHandler.data);
+                    using var sha = System.Security.Cryptography.SHA256.Create();
+                    byte[] remoteHash = sha.ComputeHash(remoteData);
+                    byte[] localHash = sha.ComputeHash(localData);
+
+                    shouldWrite = !remoteHash.SequenceEqual(localHash);
+                }
+
+                if (shouldWrite)
+                {
+                    LogManager.Log("Downloaded " + fileName);
+                    File.WriteAllBytes(filePath, remoteData);
                 }
 
                 if (action == null)
                     yield break;
+
                 LoadSoundFromFile(fileName, action);
             }
         }
