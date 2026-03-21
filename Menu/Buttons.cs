@@ -568,7 +568,7 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Bypass Mod Checkers", enableMethod =() => PropertiesPatches.enabled = true, method = Safety.BypassModCheckers, disableMethod =() => PropertiesPatches.enabled = false, toolTip = "Tells players using mod checkers that you have no mods."},
                 new ButtonInfo { buttonText = "Bypass Cosmetic Check", method =() => RequestPatch.bypassCosmeticCheck = true, disableMethod =() => RequestPatch.bypassCosmeticCheck = false, toolTip = "Turns off the networking for any cosmetic mods, stopping people from seeing if you're using one."},
 
-                new ButtonInfo { buttonText = "Spoof Platform", enableMethod =() => Safety.SpoofPlatform(true), disableMethod =() => Safety.SpoofPlatform(false) },
+                new ButtonInfo { buttonText = "Spoof Platform", enableMethod =() => Safety.SpoofPlatform(true), disableMethod =() => Safety.SpoofPlatform(false), toolTip = "Allows you to be seen as a Quest player to some mod checkers." },
 
                 new ButtonInfo { buttonText = "Anti Predictions", enableMethod = Safety.AntiPredictions, disableMethod =() => SerializePatch.OverrideSerialization = null, toolTip = "Prevents people from checking if your predictions are too high."},
 
