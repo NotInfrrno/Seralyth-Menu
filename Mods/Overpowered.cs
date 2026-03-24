@@ -6597,9 +6597,10 @@ namespace Seralyth.Mods
                 return;
             }
 
-            SerializePatch.OverrideSerialization ??= () =>
+            SerializePatch.OverrideSerialization = () =>
             {
                 MassSerialize(true, new[] { GreyZoneManager.Instance.photonView });
+                SerializePatch.OverrideSerialization = null;
                 return false;
             };
 
