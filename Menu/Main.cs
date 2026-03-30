@@ -5698,7 +5698,8 @@ namespace Seralyth.Menu
             if (!disableRoomNotifications)
                 NotificationManager.SendNotification($"<color=grey>[</color><color=blue>JOIN ROOM</color><color=grey>]</color> Room Code: {lastRoom}");
 
-            Safety.SpoofPlatform(Safety.spoofingPlatform);
+            if (Safety.spoofingPlatform)
+                Safety.SpoofPlatform(true);
 
             OnMasterClientSwitch(NetworkSystem.Instance.MasterClient);
             RPCProtection();
@@ -5738,6 +5739,8 @@ namespace Seralyth.Menu
         {
             if (Player != NetworkSystem.Instance.LocalPlayer && !disablePlayerNotifications)
                 NotificationManager.SendNotification($"<color=grey>[</color><color=green>JOIN</color><color=grey>]</color> Name: {CleanPlayerName(Player.NickName)}");
+            if (Safety.spoofingPlatform)
+                Safety.SpoofPlatform(true);
         }
 
         private static void OnPlayerLeave(NetPlayer Player)
