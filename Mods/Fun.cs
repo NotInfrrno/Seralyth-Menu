@@ -117,14 +117,13 @@ namespace Seralyth.Mods
 
             soundboardVolumeIndex = Mathf.Round(soundboardVolumeIndex * 10f) / 10f;
 
-            VoiceManager.Get().AudioClips.ForEach(t => t.Gain = soundboardVolumeIndex);
-            VoiceManager.Get().ClipGain = soundboardVolumeIndex;
+            VoiceManager.Get().ClipVolume = soundboardVolumeIndex;
 
-            Buttons.GetIndex("Change Soundboard Volume").overlapText = "Change Soundboard Volume <color=grey>[</color><color=green>" + soundboardVolumeIndex + "</color><color=grey>]</color>";
+            Buttons.GetIndex("Change Soundboard Volume").overlapText = "Change Default Soundboard Volume <color=grey>[</color><color=green>" + soundboardVolumeIndex + "</color><color=grey>]</color>";
         }
 
         public static float soundboardSpeedIndex = 1;
-        public static void ChangeSoundboardPitch(bool positive = true)
+        public static void ChangeSoundboardSpeed(bool positive = true)
         {
             if (positive)
                 soundboardSpeedIndex += 0.1f;
@@ -138,10 +137,9 @@ namespace Seralyth.Mods
 
             soundboardSpeedIndex = Mathf.Round(soundboardSpeedIndex * 10f) / 10f;
 
-            VoiceManager.Get().AudioClips.ForEach(t => t.Pitch = soundboardSpeedIndex);
-            VoiceManager.Get().ClipPitch = soundboardSpeedIndex;
+            VoiceManager.Get().ClipVolume = soundboardSpeedIndex;
 
-            Buttons.GetIndex("Change Soundboard Speed").overlapText = "Change Soundboard Speed <color=grey>[</color><color=green>" + soundboardSpeedIndex + "</color><color=grey>]</color>";
+            Buttons.GetIndex("Change Soundboard Speed").overlapText = "Change Default Soundboard Speed <color=grey>[</color><color=green>" + soundboardSpeedIndex + "</color><color=grey>]</color>";
         }
 
         public static int headSpinIndex;

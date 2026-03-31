@@ -5350,7 +5350,7 @@ namespace Seralyth.Mods
             return clip;
         }
 
-        public static Dictionary<AudioClip, Guid> tinnitus = new Dictionary<AudioClip, Guid>();
+        public static Dictionary<AudioClip, VoiceManager.Clip> tinnitus = new Dictionary<AudioClip, VoiceManager.Clip>();
         public static void TinnitusGun()
         {
             if (GetGunInput(false))
@@ -5367,9 +5367,9 @@ namespace Seralyth.Mods
                         gunLocked = true;
                         lockTarget = gunTarget;
 
-                        AudioClip clip = CreateTinnitusSound();
-                        Guid id = VoiceManager.Get().AudioClip(clip);
-                        tinnitus[clip] = id;
+                        AudioClip audioClip = CreateTinnitusSound();
+                        VoiceManager.Clip clip = VoiceManager.Get().AudioClip(audioClip);
+                        tinnitus[audioClip] = clip;
 
                         NetworkSystem.Instance.VoiceConnection.PrimaryRecorder.DebugEchoMode = tinnitusSelf;
 
@@ -5407,9 +5407,9 @@ namespace Seralyth.Mods
         public static void TinnitusAll()
         {
             if (!PhotonNetwork.InRoom) return;
-            AudioClip clip = CreateTinnitusSound();
-            Guid id = VoiceManager.Get().AudioClip(clip);
-            tinnitus[clip] = id;
+            AudioClip audioClip = CreateTinnitusSound();
+            VoiceManager.Clip clip = VoiceManager.Get().AudioClip(audioClip);
+            tinnitus[audioClip] = clip;
             NetworkSystem.Instance.VoiceConnection.PrimaryRecorder.DebugEchoMode = tinnitusSelf;
 
             SerializePatch.OverrideSerialization = () =>
@@ -5437,8 +5437,8 @@ namespace Seralyth.Mods
         public static void DisableTinnitus()
         {
             SerializePatch.OverrideSerialization = null;
-            foreach (var id in tinnitus.Values)
-                VoiceManager.Get().StopAudioClip(id);
+            foreach (VoiceManager.Clip clip in tinnitus.Values)
+                VoiceManager.Get().StopAudioClip(clip);
             tinnitus.Clear();
         }
 

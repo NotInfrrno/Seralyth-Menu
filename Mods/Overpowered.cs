@@ -4158,7 +4158,7 @@ namespace Seralyth.Mods
 
         public static AudioClip KameStart;
         public static AudioClip KameStop;
-        public static Guid KameSound;
+        public static VoiceManager.Clip KameSound;
         public static Coroutine KameStartCoroutine;
 
         public static void Enable_Kamehameha()
@@ -4299,10 +4299,10 @@ namespace Seralyth.Mods
         {
             if (RecorderPatch.enabled)
             {
-                if (KameSound != Guid.Empty)
+                if (KameSound != null)
                 {
                     VoiceManager.Get().StopAudioClip(KameSound);
-                    KameSound = Guid.Empty;
+                    KameSound = null;
                 }
                 KameSound = VoiceManager.Get().AudioClip(clip);
             }

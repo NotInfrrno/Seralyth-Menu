@@ -6353,7 +6353,7 @@ namespace Seralyth.Mods
                 Fun.ChangeSoundboardVolume();
 
                 Fun.soundboardSpeedIndex = float.Parse(data[70]) - 1;
-                Fun.ChangeSoundboardPitch();
+                Fun.ChangeSoundboardSpeed();
 
                 SoundManager.DefaultSoundpack = data[71];
                 Buttons.GetIndex("Change Menu Soundpack").overlapText = $"Change Menu Soundpack <color=grey>[</color><color=green>{SoundManager.DefaultSoundpack}</color><color=grey>]</color>";

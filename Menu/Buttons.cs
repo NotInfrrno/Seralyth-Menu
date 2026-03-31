@@ -25,7 +25,9 @@ using GorillaTagScripts;
 using GorillaTagScripts.ObstacleCourse;
 using Photon.Pun;
 using Seralyth.Classes.Menu;
+using Seralyth.Extensions;
 using Seralyth.Managers;
+using Seralyth.Menu;
 using Seralyth.Mods;
 using Seralyth.Patches.Menu;
 using Seralyth.Patches.Safety;
@@ -36,6 +38,7 @@ using System.Diagnostics;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using static Fusion.Sockets.NetBitBuffer;
 using static Seralyth.Menu.Main;
 using static Seralyth.Utilities.RandomUtilities;
 using static Seralyth.Utilities.RigUtilities;
@@ -566,7 +569,7 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Bypass Mod Checkers", enableMethod =() => PropertiesPatches.enabled = true, method = Safety.BypassModCheckers, disableMethod =() => PropertiesPatches.enabled = false, toolTip = "Tells players using mod checkers that you have no mods."},
                 new ButtonInfo { buttonText = "Bypass Cosmetic Check", method =() => RequestPatch.bypassCosmeticCheck = true, disableMethod =() => RequestPatch.bypassCosmeticCheck = false, toolTip = "Turns off the networking for any cosmetic mods, stopping people from seeing if you're using one."},
 
-                new ButtonInfo { buttonText = "Spoof Platform", enableMethod =() => Safety.SpoofPlatform(true), disableMethod =() => Safety.SpoofPlatform(false), toolTip = "Allows you to be seen as a Quest player to some mod checkers." },
+                new ButtonInfo { buttonText = "Spoof Platform", aliases = new[] { "Platform Spoof" }, enableMethod =() => Safety.SpoofPlatform(true), disableMethod =() => Safety.SpoofPlatform(false), toolTip = "Allows you to be seen as a Quest player to some mod checkers." },
 
                 new ButtonInfo { buttonText = "Anti Predictions", enableMethod = Safety.AntiPredictions, disableMethod =() => SerializePatch.OverrideSerialization = null, toolTip = "Prevents people from checking if your predictions are too high."},
 
@@ -2402,9 +2405,9 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "Loop Sounds", enableMethod =() => Sound.LoopAudio = true, disableMethod =() => Sound.LoopAudio = false, toolTip = "Makes sounds loop forever until stopped."},
                 new ButtonInfo { buttonText = "Overlap Sounds", enableMethod =() => Sound.OverlapAudio = true, disableMethod =() => Sound.OverlapAudio = false, toolTip = "Makes it so you can play sounds over and over again, making them overlap eachother."},
                 new ButtonInfo { buttonText = "Sound Bindings", overlapText = "Sound Bindings <color=grey>[</color><color=green>None</color><color=grey>]</color>", method =() => Sound.SoundBindings(), enableMethod =() => Sound.SoundBindings(), disableMethod =() => Sound.SoundBindings(false), incremental = true, isTogglable = false, toolTip = "Changes the button used to play sounds on the soundboard."},
-                new ButtonInfo { buttonText = "Change Soundboard Volume", overlapText = "Change Soundboard Volume <color=grey>[</color><color=green>1</color><color=grey>]</color>", method =() => Fun.ChangeSoundboardVolume(), enableMethod =() => Fun.ChangeSoundboardVolume(), disableMethod =() => Fun.ChangeSoundboardVolume(false), incremental = true, isTogglable = false, toolTip = "Changes the volume of your sounds." },
+                new ButtonInfo { buttonText = "Change Soundboard Volume", overlapText = "Change Default Soundboard Volume <color=grey>[</color><color=green>1</color><color=grey>]</color>", method =() => Fun.ChangeSoundboardVolume(), enableMethod =() => Fun.ChangeSoundboardVolume(), disableMethod =() => Fun.ChangeSoundboardVolume(false), incremental = true, isTogglable = false, toolTip = "Changes the volume of your sounds." },
 
-                new ButtonInfo { buttonText = "Change Soundboard Speed", overlapText = "Change Soundboard Speed <color=grey>[</color><color=green>1</color><color=grey>]</color>", method =() => Fun.ChangeSoundboardPitch(), enableMethod =() => Fun.ChangeSoundboardPitch(), disableMethod =() => Fun.ChangeSoundboardPitch(false), incremental = true, isTogglable = false, toolTip = "Changes the speed of your sounds" },
+                new ButtonInfo { buttonText = "Change Soundboard Speed", overlapText = "Change Default Soundboard Speed <color=grey>[</color><color=green>1</color><color=grey>]</color>", method =() => Fun.ChangeSoundboardSpeed(), enableMethod =() => Fun.ChangeSoundboardSpeed(), disableMethod =() => Fun.ChangeSoundboardSpeed(false), incremental = true, isTogglable = false, toolTip = "Changes the speed of your sounds." },
                 new ButtonInfo { buttonText = "Disable Local Soundboard", enableMethod =() => Sound.disableLocalSoundboard = true, disableMethod =()=> Sound.disableLocalSoundboard = false, toolTip = "Decides if you should hear your own soundboards or not." },
             },
 
@@ -2706,7 +2709,12 @@ namespace Seralyth.Menu
                 new ButtonInfo { buttonText = "High Pitch Microphone", enableMethod =() => Fun.SetMicrophonePitch(1.5f), disableMethod =() => Fun.SetMicrophonePitch(1f), toolTip = "Makes your microphone high pitched."},
                 new ButtonInfo { buttonText = "Low Pitch Microphone", enableMethod =() => Fun.SetMicrophonePitch(0.8f), disableMethod =() => Fun.SetMicrophonePitch(1f), toolTip = "Makes your microphone low pitched."},
                 new ButtonInfo { buttonText = "Very Low Pitch Microphone", enableMethod =() => Fun.SetMicrophonePitch(0.5f), disableMethod =() => Fun.SetMicrophonePitch(1f), toolTip = "Makes your microphone very very low pitched."},
-            }
+            },
+
+            new[] // Sound Properties [50]
+            {
+                new ButtonInfo { buttonText = "Exit Sound's Properties", method = () => CurrentCategoryName = "Soundboard", isTogglable = false, toolTip = "Returns you back to the Soundboard page." }
+            } 
         };
 
         public static string[] categoryNames = {
@@ -2759,7 +2767,8 @@ namespace Seralyth.Menu
             "Mod List",
             "Patreon Mods",
             "Patreon Settings",
-            "Voice Changers"
+            "Voice Changers",
+            "Sound Properties"
         };
 
         public static int _currentCategoryIndex;
@@ -2940,6 +2949,157 @@ namespace Seralyth.Menu
 
             buttons[category] = buttonInfoList.ToArray();
         }
+    }
+}
+
+public class UpdateButtonText : MonoBehaviour
+{
+    public ButtonInfo button;
+    public int buttonIndex;
+    public float offset;
+
+    private TextMeshPro tmp;
+    private UIColorChanger colorChanger;
+    private bool initialized;
+    private string lastRendered;
+
+    public void Init(ButtonInfo b, int idx, float off)
+    {
+        button = b;
+        buttonIndex = idx;
+        offset = off;
+
+        EnsureReferences();
+        ApplyLayout();
+        initialized = true;
+    }
+
+    private void EnsureReferences()
+    {
+        if (tmp == null) tmp = GetComponent<TextMeshPro>();
+        if (colorChanger == null)
+            colorChanger = GetComponent<UIColorChanger>() ?? gameObject.AddComponent<UIColorChanger>();
+    }
+
+    private void ApplyLayout()
+    {
+        RectTransform textTransform = tmp.rectTransform;
+        textTransform.localPosition = Vector3.zero;
+        textTransform.sizeDelta = new Vector2(button != null && button.incremental && incrementalButtons ? .18f : .2f, .03f * (ButtonDistance / 0.1f));
+        if (NoAutoSizeText) textTransform.sizeDelta = new Vector2(9f, 0.015f);
+        if (hideTextOnCamera) textTransform.gameObject.layer = 19;
+        textTransform.localPosition = new Vector3(.064f, 0, .111f - offset / 2.6f);
+        textTransform.localRotation = Quaternion.Euler(180f, 90f, 90f);
+
+        tmp.font = activeFont;
+        tmp.spriteAsset = ButtonSpriteSheet;
+        tmp.richText = true;
+        tmp.fontSize = 1;
+        tmp.alignment = checkMode ? TextAlignmentOptions.Left : TextAlignmentOptions.Center;
+        tmp.fontStyle = activeFontStyle;
+        tmp.enableAutoSizing = true;
+        tmp.fontSizeMin = 0;
+    }
+
+    public void UpdateText()
+    {
+        if (!initialized || button == null) return;
+        EnsureReferences();
+        ApplyLayout();
+
+        string targetButtonText = ButtonText();
+        lastRendered = targetButtonText;
+        tmp.SafeSetText(targetButtonText);
+        FollowMenuSettings(tmp);
+
+        if (joystickMenu && buttonIndex == joystickButtonSelected && themeType == 30)
+            tmp.color = Color.red;
+        else
+            colorChanger.colors = textColors[button.enabled ? 2 : 1];
+    }
+
+    private void LateUpdate()
+    {
+        if (!initialized || button == null || tmp == null) return;
+        EnsureReferences();
+
+        string targetButtonText = ButtonText();
+
+        if (lastRendered != targetButtonText || string.IsNullOrEmpty(tmp.text))
+        {
+            lastRendered = targetButtonText;
+            tmp.SafeSetText(targetButtonText);
+            FollowMenuSettings(tmp);
+        }
+
+        if (joystickMenu && buttonIndex == joystickButtonSelected && themeType == 30)
+            tmp.color = Color.red;
+        else
+            colorChanger.colors = textColors[button.enabled ? 2 : 1];
+    }
+
+    private string ButtonText()
+    {
+        string targetButtonText = button.overlapText ?? button.buttonText;
+
+        if (button.detected)
+            targetButtonText = $"<color=red>{targetButtonText}</color>";
+
+        if (adaptiveButtons)
+        {
+            switch (ControllerUtilities.GetLeftControllerType())
+            {
+                case ControllerUtilities.ControllerType.ValveIndex:
+                    foreach (var r in new Dictionary<string, string> { { "x", "la" }, { "y", "lb" } })
+                        targetButtonText = targetButtonText.Replace($"<color=green>{r.Key.ToUpper()}</color>", $"<color=green>{r.Value.ToUpper()}</color>");
+                    break;
+
+                case ControllerUtilities.ControllerType.VIVE:
+                    foreach (var r in new Dictionary<string, string> { { "x", "ltp" } })
+                        targetButtonText = targetButtonText.Replace($"<color=green>{r.Key.ToUpper()}</color>", $"<color=green>{r.Value.ToUpper()}</color>");
+                    break;
+            }
+
+            switch (ControllerUtilities.GetRightControllerType())
+            {
+                case ControllerUtilities.ControllerType.ValveIndex:
+                    foreach (var r in new Dictionary<string, string> { { "a", "ra" }, { "b", "rb" } })
+                        targetButtonText = targetButtonText.Replace($"<color=green>{r.Key.ToUpper()}</color>", $"<color=green>{r.Value.ToUpper()}</color>");
+                    break;
+
+                case ControllerUtilities.ControllerType.VIVE:
+                    foreach (var r in new Dictionary<string, string> { { "a", "rtp" } })
+                        targetButtonText = targetButtonText.Replace($"<color=green>{r.Key.ToUpper()}</color>", $"<color=green>{r.Value.ToUpper()}</color>");
+                    break;
+            }
+        }
+
+        if (button.rebindKey != null && targetButtonText.Contains("</color><color=grey>]</color>"))
+        {
+            targetButtonText = targetButtonText.Split("<color=grey>[</color><color=green>")[0]
+                + "<color=grey>[</color><color=green>"
+                + button.rebindKey
+                + "</color><color=grey>]</color>";
+        }
+
+        if (button.customBind != null)
+        {
+            if (targetButtonText.Contains("</color><color=grey>]</color>"))
+                targetButtonText = targetButtonText.Replace("</color><color=grey>]</color>", $"/{button.customBind}</color><color=grey>]</color>");
+            else
+                targetButtonText += $" <color=grey>[</color><color=green>{button.customBind}</color><color=grey>]</color>";
+        }
+
+        if (inputTextColor != "green")
+            targetButtonText = targetButtonText.Replace(" <color=grey>[</color><color=green>", $" <color=grey>[</color><color={inputTextColor}>");
+
+        targetButtonText = FixTMProTags(targetButtonText);
+        targetButtonText = FollowMenuSettings(targetButtonText, true);
+
+        if (favorites.Contains(button.buttonText))
+            targetButtonText = $"    {targetButtonText}    <sprite name=\"Favorite\">";
+
+        return targetButtonText;
     }
 }
 

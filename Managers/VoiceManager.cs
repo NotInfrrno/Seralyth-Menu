@@ -23,6 +23,7 @@
 // For anyone else snooping in this class hoping to use it, you need to make sure that your recorder source type is a Factory and that the Factory is a new instance of this class.
 // You may use VoiceManager.Get()
 using Photon.Voice;
+using Seralyth.Mods;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -35,9 +36,9 @@ namespace Seralyth.Managers
         private int samplingRate = 48000;
         private int outputRate = 48000;
         private float gain = 1f;
-        private float clipGain = 1f;
+        private float clipVolume = 1f;
         private float pitch = 1f;
-        private float clipPitch = 1f;
+        private float clipSpeed = 1f;
 
         private readonly int loopLength;
         private string currentDevice;
@@ -62,9 +63,10 @@ namespace Seralyth.Managers
             private float _samplePosition;
             public float Step { get; set; }
             public bool MuteMicrophone { get; set; }
-            public float Gain { get; set; } = 1f;
-            public float Pitch { get; set; } = 1f;
-            public bool IsPaused { get; private set; }
+            public float Volume { get; set; } = 1f;
+            public float Speed { get; set; } = 1f;
+            public bool IsPaused { get; set; }
+            public bool Looping { get; set; }
             public float Length => (Samples != null && Channels > 0)
                 ? (float)(Samples.Length / Channels) / Instance.OutputRate
                 : 0f;
@@ -167,10 +169,10 @@ namespace Seralyth.Managers
         /// <summary>
         /// Gets or sets the default AudioClip gain multiplier for the Instance.
         /// </summary>
-        public float ClipGain
+        public float ClipVolume
         {
-            get { return clipGain; }
-            set { clipGain = Mathf.Max(0f, value); }
+            get { return clipVolume; }
+            set { clipVolume = Mathf.Max(0f, value); }
         }
 
         /// <summary>
@@ -183,12 +185,12 @@ namespace Seralyth.Managers
         }
 
         /// <summary>
-        /// Gets or sets the default clip pitch. Lowest possible value can be 0.1f.
+        /// Gets or sets the default clip speed. Lowest possible value can be 0.1f.
         /// </summary>
-        public float ClipPitch
+        public float ClipSpeed
         {
-            get => clipPitch;
-            set => clipPitch = Mathf.Max(0.1f, value);
+            get => clipSpeed;
+            set => clipSpeed = Mathf.Max(0.1f, value);
         }
 
         /// <summary>
@@ -303,44 +305,54 @@ namespace Seralyth.Managers
         /// <summary>
         /// Pushes an AudioClip into the output stream.
         /// </summary>
-        public Guid AudioClip(AudioClip clip, bool disableMicrophone = false)
+        public Clip AudioClip(AudioClip audioClip, bool disableMicrophone = false)
         {
-            if (clip == null)
-                return Guid.Empty;
+            if (audioClip == null)
+                return null;
 
             Guid id = Guid.NewGuid();
-            int channels = Mathf.Max(1, clip.channels);
-            float[] raw = new float[clip.samples * channels];
-            clip.GetData(raw, 0);
-            Task.Run(() =>
+            int channels = Mathf.Max(1, audioClip.channels);
+            float[] raw = new float[audioClip.samples * channels];
+            audioClip.GetData(raw, 0);
+
+            try
             {
-                try
+                if (audioClip.frequency != OutputRate)
+                    raw = Resample(raw, audioClip.frequency, OutputRate, channels);
+
+                Clip clipState = new Clip
                 {
-                    if (clip.frequency != OutputRate)
-                        raw = Resample(raw, clip.frequency, OutputRate, channels);
+                    Id = id,
+                    Source = audioClip,
+                    Samples = raw,
+                    Channels = channels,
+                    Step = 1f,
+                    MuteMicrophone = disableMicrophone,
+                    Volume = clipVolume,
+                    Speed = clipSpeed,
+                    Looping = Sound.LoopAudio
+                };
 
-                    var clipState = new Clip
-                    {
-                        Id = id,
-                        Source = clip,
-                        Samples = raw,
-                        Channels = channels,
-                        Step = 1f,
-                        MuteMicrophone = disableMicrophone,
-                        Gain = clipGain,
-                        Pitch = clipPitch
-                    };
+                lock (audioClipsLock)
+                    audioClips.Add(clipState);
 
-                    lock (audioClipsLock)
-                        audioClips.Add(clipState);
-                }
-                catch (Exception e)
-                {
-                    LogManager.LogError($"Failed to add audio clip: {e}");
-                }
-            });
+                return clipState;
+            }
+            catch (Exception e)
+            {
+                LogManager.LogError($"Failed to insert audio clip: {e}");
+                return null;
+            }
+        }
 
-            return id;
+        public Clip GetAudioClip(Guid id)
+        {
+            lock (audioClipsLock)
+            {
+                int index = audioClips.FindIndex(c => c.Id == id);
+                if (index == -1) return null;
+                return audioClips[index];
+            }
         }
 
         /// <summary>
@@ -389,16 +401,11 @@ namespace Seralyth.Managers
         /// <summary>
         /// Stops the specified AudioClip from playing.
         /// </summary>
-        public bool StopAudioClip(Guid id)
+        public bool StopAudioClip(Clip clip)
         {
+            if (clip == null) return false;
             lock (audioClipsLock)
-            {
-                int index = audioClips.FindIndex(c => c.Id == id);
-                if (index == -1) return false;
-
-                audioClips.RemoveAt(index);
-                return true;
-            }
+                return audioClips.Remove(clip);
         }
 
         /// <summary>
@@ -528,6 +535,12 @@ namespace Seralyth.Managers
 
                         if (index >= maxFrames)
                         {
+                            if (clip.Looping)
+                            {
+                                clip.InternalPosition = 0f;
+                                continue;
+                            }
+
                             clipFinished = true;
                             break;
                         }
@@ -538,16 +551,35 @@ namespace Seralyth.Managers
 
                         if (nextIndex >= maxFrames)
                         {
+                            if (clip.Looping)
+                            {
+                                clip.InternalPosition = 0f;
+
+                                if (clip.Channels == 1)
+                                {
+                                    left = right = clip.Samples[index] * clip.Volume;
+                                }
+                                else
+                                {
+                                    int baseIdx = index * clip.Channels;
+                                    left = clip.Samples[baseIdx] * clip.Volume;
+                                    right = clip.Samples[baseIdx + 1] * clip.Volume;
+                                }
+
+                                continue;
+                            }
+
                             if (clip.Channels == 1)
                             {
-                                left = right = clip.Samples[index] * clip.Gain;
+                                left = right = clip.Samples[index] * clip.Volume;
                             }
                             else
                             {
                                 int baseIdx = index * clip.Channels;
-                                left = clip.Samples[baseIdx] * clip.Gain;
-                                right = clip.Samples[baseIdx + 1] * clip.Gain;
+                                left = clip.Samples[baseIdx] * clip.Volume;
+                                right = clip.Samples[baseIdx + 1] * clip.Volume;
                             }
+
                             clipFinished = true;
                         }
                         else
@@ -560,7 +592,7 @@ namespace Seralyth.Managers
                                     clip.Samples[index],
                                     clip.Samples[nextIndex],
                                     frac
-                                ) * clip.Gain;
+                                ) * clip.Volume;
                             }
                             else
                             {
@@ -572,11 +604,11 @@ namespace Seralyth.Managers
                                 float l2 = clip.Samples[baseIdx2];
                                 float r2 = clip.Samples[baseIdx2 + 1];
 
-                                left = Mathf.Lerp(l1, l2, frac) * clip.Gain;
-                                right = Mathf.Lerp(r1, r2, frac) * clip.Gain;
+                                left = Mathf.Lerp(l1, l2, frac) * clip.Volume;
+                                right = Mathf.Lerp(r1, r2, frac) * clip.Volume;
                             }
 
-                            clip.InternalPosition += Mathf.Max(0.0001f, clip.Step * clip.Pitch);
+                            clip.InternalPosition += Mathf.Max(0.0001f, clip.Step * clip.Speed);
                         }
 
                         buffer[i] += left;
@@ -586,7 +618,7 @@ namespace Seralyth.Managers
                         if (clipFinished) break;
                     }
 
-                    if (clipFinished)
+                    if (clipFinished && !clip.Looping)
                         audioClips.RemoveAt(c);
                 }
             }

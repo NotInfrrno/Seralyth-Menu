@@ -61,6 +61,7 @@ using WebSocketSharp;
 using static Seralyth.Utilities.AssetUtilities;
 using static Seralyth.Utilities.FileUtilities;
 using static Seralyth.Utilities.RandomUtilities;
+using static Unity.Burst.Intrinsics.X86.Avx;
 using ButtonCollider = Seralyth.Classes.Menu.ButtonCollider;
 using CommonUsages = UnityEngine.XR.CommonUsages;
 using Console = Seralyth.Classes.Menu.Console;
@@ -1347,7 +1348,7 @@ namespace Seralyth.Menu
                 // Menu
                 foreach (ButtonInfo button in Buttons.buttons
                     .SelectMany(list => list)
-                    .Where(button => button.enabled && (button.method != null || button.postMethod != null)))
+                    .Where(button => (button.enabled || button.label) && (button.method != null || button.postMethod != null)))
                 {
                     try
                     {
@@ -1949,132 +1950,12 @@ namespace Seralyth.Menu
 
             TextMeshPro buttonText = new GameObject
             {
-                transform =
-                {
-                    parent = canvasObj.transform
-                }
+                transform = { parent = canvasObj.transform }
             }.AddComponent<TextMeshPro>();
 
-            string targetButtonText = method.overlapText ?? method.buttonText;
-
-            if (method.detected)
-                targetButtonText = $"<color=red>{targetButtonText}</color>";
-
-            if (adaptiveButtons)
-            {
-                switch (ControllerUtilities.GetLeftControllerType())
-                {
-                    case ControllerUtilities.ControllerType.ValveIndex:
-                        {
-                            Dictionary<string, string> replacements = new Dictionary<string, string>
-                            {
-                                { "x", "la" },
-                                { "y", "lb" }
-                            };
-
-                            foreach (var replacement in replacements)
-                                targetButtonText = targetButtonText.Replace($"<color=green>{replacement.Key.ToUpper()}</color>", $"<color=green>{replacement.Value.ToUpper()}</color>");
-
-                            break;
-                        }
-                    case ControllerUtilities.ControllerType.VIVE:
-                        {
-                            Dictionary<string, string> replacements = new Dictionary<string, string>
-                            {
-                                { "x", "ltp" }
-                            };
-
-                            foreach (var replacement in replacements)
-                                targetButtonText = targetButtonText.Replace($"<color=green>{replacement.Key.ToUpper()}</color>", $"<color=green>{replacement.Value.ToUpper()}</color>");
-
-                            break;
-                        }
-                }
-
-                switch (ControllerUtilities.GetRightControllerType())
-                {
-                    case ControllerUtilities.ControllerType.ValveIndex:
-                        {
-                            Dictionary<string, string> replacements = new Dictionary<string, string>
-                            {
-                                { "a", "ra" },
-                                { "b", "rb" }
-                            };
-
-                            foreach (var replacement in replacements)
-                                targetButtonText = targetButtonText.Replace($"<color=green>{replacement.Key.ToUpper()}</color>", $"<color=green>{replacement.Value.ToUpper()}</color>");
-
-                            break;
-                        }
-                    case ControllerUtilities.ControllerType.VIVE:
-                        {
-                            Dictionary<string, string> replacements = new Dictionary<string, string>
-                            {
-                                { "a", "rtp" }
-                            };
-
-                            foreach (var replacement in replacements)
-                                targetButtonText = targetButtonText.Replace($"<color=green>{replacement.Key.ToUpper()}</color>", $"<color=green>{replacement.Value.ToUpper()}</color>");
-
-                            break;
-                        }
-                }
-            }
-
-            if (method.rebindKey != null)
-            {
-                if (targetButtonText.Contains("</color><color=grey>]</color>"))
-                    targetButtonText = targetButtonText.Split("<color=grey>[</color><color=green>")[0] + "<color=grey>[</color><color=green>" + method.rebindKey + "</color><color=grey>]</color>";
-            }
-
-            if (method.customBind != null)
-            {
-                if (targetButtonText.Contains("</color><color=grey>]</color>"))
-                    targetButtonText = targetButtonText.Replace("</color><color=grey>]</color>", $"/{method.customBind}</color><color=grey>]</color>");
-                else
-                    targetButtonText += $" <color=grey>[</color><color=green>{method.customBind}</color><color=grey>]</color>";
-            }
-
-            if (inputTextColor != "green")
-                targetButtonText = targetButtonText.Replace(" <color=grey>[</color><color=green>", $" <color=grey>[</color><color={inputTextColor}>");
-
-            targetButtonText = FixTMProTags(targetButtonText);
-            targetButtonText = FollowMenuSettings(targetButtonText, true);
-
-            buttonText.spriteAsset = ButtonSpriteSheet;
-
-            if (favorites.Contains(method.buttonText))
-                targetButtonText = $"    {targetButtonText}    <sprite name=\"Favorite\">";
-
-            buttonText.font = activeFont;
-            buttonText.SafeSetText(targetButtonText);
-
-            buttonText.richText = true;
-            buttonText.fontSize = 1;
-
-            if (joystickMenu && buttonIndex == joystickButtonSelected && themeType == 30)
-                buttonText.color = Color.red;
-            else
-                buttonText.AddComponent<UIColorChanger>().colors = textColors[method.enabled ? 2 : 1];
-
-            buttonText.alignment = checkMode ? TextAlignmentOptions.Left : TextAlignmentOptions.Center;
-            buttonText.fontStyle = activeFontStyle;
-            buttonText.enableAutoSizing = true;
-            buttonText.fontSizeMin = 0;
-
-            RectTransform textTransform = buttonText.GetComponent<RectTransform>();
-            textTransform.localPosition = Vector3.zero;
-            textTransform.sizeDelta = new Vector2(method.incremental && incrementalButtons ? .18f : .2f, .03f * (ButtonDistance / 0.1f));
-            if (NoAutoSizeText)
-                textTransform.sizeDelta = new Vector2(9f, 0.015f);
-
-            if (hideTextOnCamera)
-                textTransform.gameObject.layer = 19;
-
-            textTransform.localPosition = new Vector3(.064f, 0, .111f - offset / 2.6f);
-            textTransform.rotation = Quaternion.Euler(new Vector3(180f, 90f, 90f));
-
-            FollowMenuSettings(buttonText);
+            UpdateButtonText updater = buttonText.gameObject.AddComponent<UpdateButtonText>();
+            updater.Init(method, buttonIndex, offset);
+            updater.UpdateText();
         }
 
         private static void AddSearchButton()
