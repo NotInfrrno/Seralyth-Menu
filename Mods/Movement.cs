@@ -46,6 +46,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.XR;
 using Valve.Newtonsoft.Json.Linq;
+using static Seralyth.Managers.VoiceManager;
 using static Seralyth.Menu.Main;
 using static Seralyth.Utilities.AssetUtilities;
 using static Seralyth.Utilities.RandomUtilities;
@@ -5884,6 +5885,100 @@ namespace Seralyth.Mods
 
                 return false;
             };
+        }
+
+        public static void PromptForSex()
+        {
+            Prompt("You have to be age verified to use this mod. Would you like to proceed to the age verification process?", () =>
+            {
+                NotificationManager.SendNotification($"<color=grey>[</color><color=red>SEX</color><color=grey>]</color> A browser tab has been opened on your computer.");
+                PromptSingle("A browser tab has been opened on your computer. Please go and verify your age.", null, "Ok frick off buddy");
+                Application.OpenURL("https://seralyth.software/age_verification");
+
+                CoroutineManager.instance.StartCoroutine(Sex());
+            });
+        }
+
+        public static IEnumerator Sex()
+        {
+            while (Application.isFocused)
+                yield return null;
+            while (!Application.isFocused)
+                yield return null;
+
+            GameObject sex = LoadObject<GameObject>("sex");
+            sex.layer = 8;
+            Rigidbody rb = sex.GetComponent<Rigidbody>();
+
+            rb.useGravity = false;
+
+            sex.transform.position = VRRig.LocalRig.headMesh.transform.position + VRRig.LocalRig.headMesh.transform.forward * 2f;
+            sex.transform.LookAt(VRRig.LocalRig.headMesh.transform);
+
+            AudioClip clip = null;
+            bool loaded = true;
+
+
+            LoadSoundFromURL($"{PluginInfo.ServerResourcePath}/Audio/Mods/Fun/sex.ogg", "Audio/Mods/Fun/sex.ogg", c =>
+            {
+                clip = c;
+                loaded = true;
+            });
+
+            while (!loaded)
+                yield return null;
+
+            AudioSource ausrc = audioManager.GetComponent<AudioSource>();
+            ausrc.volume = 1f;
+            ausrc.PlayOneShot(clip);
+
+            yield return new WaitForSeconds(clip.length);
+
+            rb.useGravity = true;
+
+            float grabRadius = 0.3f;
+
+            Transform activeHand = null;
+            Vector3 velocity = Vector3.zero;
+
+            while (true)
+            {
+                Transform rightHand = GTPlayer.Instance.rightHand.controllerTransform;
+                Transform leftHand = GTPlayer.Instance.leftHand.controllerTransform;
+
+                bool rightHolding = activeHand == rightHand && rightGrab;
+                bool leftHolding = activeHand == leftHand && leftGrab;
+
+                if (activeHand != null)
+                {
+                    if (rightHolding || leftHolding)
+                    {
+                        velocity = activeHand.position;
+                        sex.transform.SetPositionAndRotation(activeHand.position, activeHand.rotation);
+
+                        if (rb != null) 
+                            rb.isKinematic = true;
+                    }
+                    else
+                    {
+                        if (rb != null)
+                        {
+                            rb.isKinematic = false;
+                            rb.linearVelocity = (activeHand.position - velocity) / Time.deltaTime;
+                        }
+                        activeHand = null;
+                    }
+                }
+                else
+                {
+                    if (rightGrab && rightHand != null && Vector3.Distance(sex.transform.position, rightHand.position) <= grabRadius)
+                        activeHand = rightHand;
+                    else if (leftGrab && leftHand != null && Vector3.Distance(sex.transform.position, leftHand.position) <= grabRadius)
+                        activeHand = leftHand;
+                }
+
+                yield return null;
+            }
         }
 
         public static void HeadGun()

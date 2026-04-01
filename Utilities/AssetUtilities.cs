@@ -37,7 +37,7 @@ namespace Seralyth.Utilities
         private static AssetBundle assetBundle;
         private static void LoadAssetBundle()
         {
-            Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{PluginInfo.ClientResourcePath}.seralythmenu"); // Change later once we get the Unity project
+            Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{PluginInfo.ClientResourcePath}.seralythmenu");
             if (stream != null)
                 assetBundle = AssetBundle.LoadFromStream(stream);
             else

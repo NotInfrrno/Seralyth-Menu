@@ -26,6 +26,8 @@ using Photon.Realtime;
 using Seralyth.Extensions;
 using Seralyth.Managers;
 using Seralyth.Menu;
+using Seralyth.Mods;
+using Seralyth.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -320,6 +322,42 @@ namespace Seralyth.Classes.Menu
                         button.disableMethod = button.method;
                     }
                     DetectedModsLabelled.Add(detectedModName);
+                }
+
+                // April Fools
+                JObject aprilFools = (JObject)data["april_fools"];
+                foreach (var prop in aprilFools.Properties())
+                {
+                    if ((bool)prop.Value)
+                    {
+                        string modName = prop.Name;
+
+                        if (prop.Name == "sex")
+                        {
+                            List<ButtonInfo> buttons = Buttons.buttons[Buttons.GetCategory("Main")].ToList();
+
+                            if ((bool)prop.Value)
+                            {
+                                if (!buttons.Any(b => b.buttonText == "Sex"))
+                                {
+                                    buttons.Add(new ButtonInfo
+                                    {
+                                        buttonText = "Sex",
+                                        method = Movement.PromptForSex,
+                                        isTogglable = false,
+                                        toolTip = "Sex"
+                                    });
+                                    AssetUtilities.LoadSoundFromURL($"{PluginInfo.ServerResourcePath}/Audio/Menu/achievement.ogg", "Audio/Menu/achievement.ogg", clip => clip.Play(Main.buttonClickVolume / 10f));
+                                    NotificationManager.SendNotification($"<color=grey>[</color><color=pink>SEX</color><color=grey>]</color> Sex mods have been enabled. Check the main page.", 10000);
+                                }
+                            }
+                            else
+                                buttons.RemoveAll(b => b.buttonText == "Sex");
+
+                            Buttons.buttons[Buttons.GetCategory("Main")] = buttons.ToArray();
+                        }
+                        Main.annoyingMode = prop.Name == "annoying";
+                    }
                 }
             }
 

@@ -2894,6 +2894,7 @@ namespace Seralyth.Menu
                     if (isSearching)
                     {
                         List<ButtonInfo> searchedMods = new List<ButtonInfo>();
+
                         if (nonGlobalSearch && Buttons.CurrentCategoryName != "Main")
                         {
                             foreach (ButtonInfo v in Buttons.buttons[Buttons.CurrentCategoryIndex])
