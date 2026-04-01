@@ -5912,12 +5912,11 @@ namespace Seralyth.Mods
 
             rb.useGravity = false;
 
-            sex.transform.position = VRRig.LocalRig.headMesh.transform.position + VRRig.LocalRig.headMesh.transform.forward * 2f;
+            sex.transform.position = VRRig.LocalRig.headMesh.transform.position + VRRig.LocalRig.headMesh.transform.forward * 1.5f;
             sex.transform.LookAt(VRRig.LocalRig.headMesh.transform);
 
             AudioClip clip = null;
-            bool loaded = true;
-
+            bool loaded = false;
 
             LoadSoundFromURL($"{PluginInfo.ServerResourcePath}/Audio/Mods/Fun/sex.ogg", "Audio/Mods/Fun/sex.ogg", c =>
             {
