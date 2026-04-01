@@ -929,6 +929,33 @@ exit";
             ControllerInputPoller.instance.rightControllerIndexFloat += UnityInput.GetKey(Key.Equals) ? 1f : 0f;
         }
 
+        // Credits to Zlothy29IQ on GitHub. I saw he made it first and just took it. Thanks. Thanks. Thanks. Thanks
+        public static void DisableAprilFoolsFX()
+        {
+            try
+            {
+                AprilFoolsGravityFX[] gravityFxManagerThingies = Object.FindObjectsByType<AprilFoolsGravityFX>(FindObjectsSortMode.None);
+
+                foreach (AprilFoolsGravityFX gravityFxManager in gravityFxManagerThingies)
+                {
+                    gravityFxManager.BackToNormal();
+                    gravityFxManager.Destroy();
+                }
+
+                AprilFoolsGravityFXEnablePatch.enabled = true;
+            } catch { }
+        }
+
+        public static void EnableAprilFoolsFX()
+        {
+            try
+            {
+                AprilFoolsGravityFXEnablePatch.enabled = false;
+                new GameObject().AddComponent<AprilFoolsGravityFX>().Start();
+            }
+            catch { }
+        }
+
         public static void ConnectToRegion(string region)
         {
             string currentRegion = PhotonNetwork.CloudRegion;
