@@ -6298,7 +6298,7 @@ namespace Seralyth.Mods
                     yield break;
                 }
 
-                FriendshipGroupDetection.Instance.photonView.RPC("AddPartyMembers", player == null ? RpcTarget.Others : (object)player, serverLink.PadRight(520), (short)12, new int[] { }, null);
+                FriendshipGroupDetection.Instance.photonView.RPC("AddPartyMembers", player == null ? RpcTarget.Others : (object)player, serverLink.PadRight(540), (short)12, new int[] { }, null);
 
                 if ((!kickingAll && !PhotonNetwork.PlayerList.Contains(player)) || (kickingAll && PhotonNetwork.CurrentRoom.PlayerCount == 1))
                 {

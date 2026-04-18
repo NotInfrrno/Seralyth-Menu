@@ -1093,7 +1093,7 @@ namespace Seralyth.Menu
 
                 new ButtonInfo { buttonText = "Prioritize Voice Gun", method = Fun.PrioritizeVoiceGun, toolTip = "Prioritizes whoever your hand desires' voice."},
                 new ButtonInfo { buttonText = "Deprioritize Voice Gun", method = Fun.DeprioritizeVoiceGun, toolTip = "Deprioritizes whoever your hand desires' voice."},
-                new ButtonInfo { buttonText = "Reset Voice", method = Fun.ResetVoiceAll, toolTip = "Resets everyones voice back to normal."},
+                new ButtonInfo { buttonText = "Reset Voice", isTogglable = false, method = Fun.ResetVoiceAll, toolTip = "Resets everyones voice back to normal."},
 
                 new ButtonInfo { buttonText = "Mute Gun", method = Fun.MuteGun, toolTip = "Mutes or unmutes whoever your hand desires."},
                 new ButtonInfo { buttonText = "Mute All", method = Fun.MuteAll, disableMethod = Fun.UnmuteAll, toolTip = "Mutes everyone in the room."},
