@@ -710,32 +710,35 @@ exit";
         private static bool acceptedTOS;
         public static void AcceptTOS()
         {
-            GameObject RoomObject = GetObject("Miscellaneous Scripts/PrivateUIRoom_HandRays");
-            if (RoomObject == null)
-                return;
-
-            HandRayController HandRayController = RoomObject.GetComponent<HandRayController>();
-            PrivateUIRoom PrivateUIRoom = RoomObject.GetComponent<PrivateUIRoom>();
-
-            if (!acceptedTOS && PrivateUIRoom.inOverlay)
+            try
             {
-                HandRayController.DisableHandRays();
+                GameObject RoomObject = GetObject("Miscellaneous Scripts/PrivateUIRoom_HandRays");
+                if (RoomObject == null)
+                    return;
 
-                PrivateUIRoom.overlayForcedActive = false;
-                PrivateUIRoom.StopOverlay();
+                HandRayController HandRayController = RoomObject.GetComponent<HandRayController>();
+                PrivateUIRoom PrivateUIRoom = RoomObject.GetComponent<PrivateUIRoom>();
 
-                if (!TOSPatches.enabled)
+                if (!acceptedTOS && PrivateUIRoom.inOverlay)
                 {
-                    GorillaTagger.Instance.tapHapticStrength = 0.5f;
-                    GorillaSnapTurn.LoadSettingsFromCache();
-                    TOSPatches.enabled = true;
+                    HandRayController.DisableHandRays();
+
+                    PrivateUIRoom.StopOverlay();
+
+                    if (!TOSPatches.enabled)
+                    {
+                        GorillaTagger.Instance.tapHapticStrength = 0.5f;
+                        GorillaSnapTurn.LoadSettingsFromCache();
+                        TOSPatches.enabled = true;
+                    }
+
+                    acceptedTOS = true;
                 }
 
-                acceptedTOS = true;
+                if (RoomObject.activeSelf)
+                    RoomObject.SetActive(false);
             }
-
-            if (RoomObject.activeSelf)
-                RoomObject.SetActive(false);
+            catch { }
         }
 
         public static IEnumerator RedeemShinyRocks()
