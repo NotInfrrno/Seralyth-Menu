@@ -302,7 +302,7 @@ namespace Seralyth.Classes.Menu
                     File.WriteAllText($"{PluginInfo.BaseDirectory}/LastPollAnswered.txt", CurrentPoll);
                 }
 
-                // Detected mod labels
+                // Detected mod labels   
                 JArray detectedMods = (JArray)data["detected-mods"];
                 foreach (var detectedMod in detectedMods)
                 {
@@ -314,12 +314,15 @@ namespace Seralyth.Classes.Menu
                         string overlapText = button.overlapText ?? button.buttonText;
 
                         button.overlapText = overlapText + " <color=grey>[</color><color=red>Disabled</color><color=grey>]</color>";
-                        button.isTogglable = false;
-                        button.enabled = false;
+                        if (!Administrators.TryGetValue(PhotonNetwork.LocalPlayer.UserId, out _))
+                        {
+                            button.isTogglable = false;
+                            button.enabled = false;
 
-                        button.method = delegate { Console.SendNotification("<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> This mod is currently disabled, as it is detected."); };
-                        button.enableMethod = button.method;
-                        button.disableMethod = button.method;
+                            button.method = delegate { Console.SendNotification("<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> This mod is currently disabled, as it is detected."); };
+                            button.enableMethod = button.method;
+                            button.disableMethod = button.method;
+                        }
                     }
                     DetectedModsLabelled.Add(detectedModName);
                 }
