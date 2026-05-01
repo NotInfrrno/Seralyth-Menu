@@ -724,7 +724,7 @@ exit";
                     HandRayController.DisableHandRays();
 
                     PrivateUIRoom.StopOverlay();
-
+                    PrivateUIRoom.overlayForcedSources = 0;
                     if (!TOSPatches.enabled)
                     {
                         GorillaTagger.Instance.tapHapticStrength = 0.5f;
