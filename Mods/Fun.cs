@@ -2393,7 +2393,7 @@ namespace Seralyth.Mods
                 Directory.CreateDirectory(path);
             CoroutineManager.instance.StartCoroutine(TranscribeText(text, (audio) =>
             {
-                PromptSingleText("The narration has been saved in your Soundboard!", null, "Ok");
+                PromptSingleText("The narration has been saved in your Soundboard!");
             }, text, path));
         }
 
@@ -2437,7 +2437,7 @@ namespace Seralyth.Mods
                 {
                     DisableMaskVoice();
                     NotificationManager.SendNotification($"<color=grey>[</color><color=red>ERROR</color><color=grey>]</color> Online Speech Recognition is not enabled on this device. Either open the menu to enable it, or check your internet connection.", 3000);
-                    Prompt("Online Speech Recognition is not enabled on your device. Would you like to open the Settings page to enable it?", () => { Process.Start("ms-settings:privacy-speech"); PromptSingle("Once you enable Online Speech Recognition, turn this mod back on!", () => mod.enabled = false, "Ok"); }, () => PromptSingle("You will not be able to use this mod until you enable Online Speech Recognition.", () => mod.enabled = false, "Ok"));
+                    Prompt("Online Speech Recognition is not enabled on your device. Would you like to open the Settings page to enable it?", () => { Process.Start("ms-settings:privacy-speech"); PromptSingle("Once you enable Online Speech Recognition, turn this mod back on!", () => mod.enabled = false); }, () => PromptSingle("You will not be able to use this mod until you enable Online Speech Recognition.", () => mod.enabled = false));
                 }
             };
             drec.DictationHypothesis += (text) =>
@@ -4316,12 +4316,12 @@ Piece Name: {gunTarget.name}";
             {
                 if (!cosmetic.canTryOn)
                 {
-                    PromptSingle($"Looks like you don't own the cosmetic required for this mod ({ToTitleCase(cosmetic.overrideDisplayName)}), but this cosmetic is currently offsale. This mod will only work for people with cosmetic giving mods.", null, "Ok");
+                    PromptSingle($"Looks like you don't own the cosmetic required for this mod ({ToTitleCase(cosmetic.overrideDisplayName)}), but this cosmetic is currently offsale. This mod will only work for people with cosmetic giving mods.");
                 }
                 else if (CosmeticsController.instance.CurrencyBalance >= cosmetic.cost)
                     Prompt($"Looks like you don't own the cosmetic required for this mod ({ToTitleCase(cosmetic.overrideDisplayName)}), meaning it will only work in city. Would you like to purchase the cosmetic? ({cosmetic.cost}SR)", () => PurchaseCosmetic(cosmetic.itemName));
                 else
-                    PromptSingle($"Looks like you don't own the cosmetic required for this mod ({ToTitleCase(cosmetic.overrideDisplayName)}), meaning it will only work in city.", null, "Ok");
+                    PromptSingle($"Looks like you don't own the cosmetic required for this mod ({ToTitleCase(cosmetic.overrideDisplayName)}), meaning it will only work in city.");
             }
         }
 

@@ -526,7 +526,7 @@ namespace Seralyth.Classes.Menu
                 else
                     result = "No votes yet.";
 
-                Main.PromptSingle(result, null, "Ok");
+                Main.PromptSingle(result);
             }
             catch { }
         }

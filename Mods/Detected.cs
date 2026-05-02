@@ -849,7 +849,7 @@ namespace Seralyth.Mods
         public static string name = "SERALYTH";
 
         public static void PromptNameChange() =>
-            Prompt("Would you like to set a name?", () => PromptSingleText("Please enter the name you'd like to use:", () => name = keyboardInput));
+            Prompt("Would you like to set a name?", () => PromptSingleText("Please enter the name you'd like to use:", () => name = keyboardInput, "Done"));
 
         public static void ChangeNameGun()
         {

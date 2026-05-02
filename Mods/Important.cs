@@ -86,7 +86,7 @@ namespace Seralyth.Mods
                 {
                     CreateRoom(finalName, room.isPublic, room.size, JoinType.Solo);
                     NotificationManager.SendNotification("<color=grey>[</color><color=green>SUCCESS</color><color=grey>]</color> Creating room, please be patient.");
-                    PromptSingle("Success! Please be patient while the room is being created.", null, "Ok");
+                    PromptSingle("Success! Please be patient while the room is being created.");
                 }, () =>
                 {
                     RoomCreator();
@@ -162,7 +162,7 @@ namespace Seralyth.Mods
                     {
                         if (keyboardInput.IsNullOrEmpty())
                         {
-                            PromptSingle("Room name cannot be empty.", null, "Ok");
+                            PromptSingle("Room name cannot be empty.");
                             RoomCreator();
                             return;
                         }

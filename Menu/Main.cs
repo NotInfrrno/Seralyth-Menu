@@ -4134,7 +4134,7 @@ namespace Seralyth.Menu
         /// <param name="Accept">Accept Action</param>
         /// <param name="AcceptButton">Accept Text</param>
 
-        public static void PromptSingle(string Message, Action Accept = null, string AcceptButton = "Yes")
+        public static void PromptSingle(string Message, Action Accept = null, string AcceptButton = "Ok")
         {
             inTextInput = false;
             keyboardInput = "";
@@ -4178,7 +4178,7 @@ namespace Seralyth.Menu
         /// <param name="Message">Title</param>
         /// <param name="Accept">Accept Action</param>
         /// <param name="AcceptButton">Accept Text</param>
-        public static void PromptSingleText(string Message, Action Accept = null, string AcceptButton = "Yes")
+        public static void PromptSingleText(string Message, Action Accept = null, string AcceptButton = "Ok")
         {
             prompts.Add(new PromptData { Message = Message, AcceptAction = Accept, DeclineAction = null, AcceptText = AcceptButton, DeclineText = null, IsText = true });
 

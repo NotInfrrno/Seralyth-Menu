@@ -4841,7 +4841,7 @@ namespace Seralyth.Mods
                     {
                         File.WriteAllText($"{PluginInfo.BaseDirectory}/Seralyth_CustomMenuName.txt", keyboardInput);
                         Apply();
-                        PromptSingle("You can always change this again by re-enabling the mod or changing it in the SeralythMenu folder!", null, "Ok");
+                        PromptSingle("You can always change this again by re-enabling the mod or changing it in the SeralythMenu folder! (located in the Gorilla Tag installation folder)");
                     });
                 }, Apply);
 
