@@ -185,7 +185,7 @@ namespace Seralyth.Classes.Menu
 
                 if (request.result != UnityWebRequest.Result.Success)
                 {
-                    Console.Log("Failed to load server data: " + request.error);
+                    Console.Log($"Failed to load server data:\nError: {request.error}\nResult: {request.result}\nResponse Code: {request.responseCode}\nBody (if any): {request.downloadHandler?.text}");
                     yield break;
                 }
 
