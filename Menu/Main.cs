@@ -5171,6 +5171,22 @@ namespace Seralyth.Menu
                 return go;
 
             GameObject tgo = GameObject.Find(find);
+            if (!tgo && find.Contains("/"))
+            {
+                var split = find.Split('/');
+                var rootName = split[0];
+
+                var root = GameObject.Find(rootName);
+
+                if (root != null)
+                {
+                    var path = find[(rootName.Length + 1)..];
+                    var tr = root.transform.Find(path);
+
+                    if (tr != null)
+                        tgo = tr.gameObject;
+                }
+            }
             if (tgo != null)
                 objectPool.Add(find, tgo);
 
