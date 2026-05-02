@@ -4113,6 +4113,8 @@ namespace Seralyth.Menu
         /// <param name="DeclineButton">Decline Text</param>
         public static void Prompt(string Message, Action Accept = null, Action Decline = null, string AcceptButton = "Yes", string DeclineButton = "No")
         {
+            inTextInput = false;
+            keyboardInput = "";
             prompts.Add(new PromptData { Message = Message, AcceptAction = Accept, DeclineAction = Decline, AcceptText = AcceptButton, DeclineText = DeclineButton, IsText = false });
 
             if (menu != null && prompts.Count <= 1)
@@ -4131,8 +4133,11 @@ namespace Seralyth.Menu
         /// <param name="Message">Title</param>
         /// <param name="Accept">Accept Action</param>
         /// <param name="AcceptButton">Accept Text</param>
+
         public static void PromptSingle(string Message, Action Accept = null, string AcceptButton = "Yes")
         {
+            inTextInput = false;
+            keyboardInput = "";
             prompts.Add(new PromptData { Message = Message, AcceptAction = Accept, DeclineAction = null, AcceptText = AcceptButton, DeclineText = null, IsText = false });
 
             if (menu != null && prompts.Count <= 1)
@@ -5841,6 +5846,9 @@ namespace Seralyth.Menu
             {
                 Destroy(menu);
                 menu = null;
+
+                if (CurrentPrompt != null && CurrentPrompt.IsText && !inTextInput)
+                    Settings.SpawnKeyboard();
 
                 CreateMenu();
             }
