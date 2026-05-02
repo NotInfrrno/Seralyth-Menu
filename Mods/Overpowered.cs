@@ -6035,7 +6035,7 @@ namespace Seralyth.Mods
                 return;
             }
 
-            Important.CreateRoom(specificRoom ?? RandomString(), kickToPublic, JoinType.JoinWithNearby);
+            Important.CreateRoom(specificRoom ?? RandomString(), kickToPublic, 0, JoinType.JoinWithNearby);
         }
 
         private static float kickDelay;
