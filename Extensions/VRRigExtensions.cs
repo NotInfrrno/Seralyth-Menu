@@ -62,11 +62,11 @@ namespace Seralyth.Extensions
             if (concatStringOfCosmeticsAllowed.Contains("S. FIRST LOGIN"))
                 suspiciouslySteam++;
 
-            if (concatStringOfCosmeticsAllowed.Contains("FIRST LOGIN") || rig.GetPhotonPlayer().CustomProperties.Count >= 2)
+            if (concatStringOfCosmeticsAllowed.Contains("FIRST LOGIN") || rig.GetPhotonPlayer().CustomProperties.Count >= 2) 
                 suspiciouslyPC++;
 
             if (rig.currentRankedSubTierPC > 0)
-                suspiciouslySteam++;
+                suspiciouslyPC++;
             else if (rig.currentRankedSubTierQuest > 0)
                 suspiciouslyQuest++;
 
