@@ -86,6 +86,7 @@ namespace Seralyth.Mods
                 {
                     CreateRoom(finalName, room.isPublic, room.size, JoinType.Solo);
                     NotificationManager.SendNotification("<color=grey>[</color><color=green>SUCCESS</color><color=grey>]</color> Creating room, please be patient.");
+                    PromptSingle("Success! Please be patient while the room is being created.", null, "Ok");
                 }, () =>
                 {
                     RoomCreator();
