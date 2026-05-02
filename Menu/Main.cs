@@ -4230,7 +4230,7 @@ namespace Seralyth.Menu
         }
 
         /// <summary>
-        /// Flushes/sends any queued RPCs to the server to prevent disconnection from RPC limits.
+        /// Flushes/sends any queued RPCs to the server to combat disconnection from RPC limits.
         /// </summary>
         public static void RPCProtection()
         {
